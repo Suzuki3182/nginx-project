@@ -1,0 +1,41 @@
+---
+- name: Configuring Keepalived
+  hosts: web
+  vars:
+    keepalived_config: true
+    keepalived_router_info:
+      - name: VI_1
+        check_script:
+          - name: check_nginx
+            script: /usr/bin/killall -0 nginx
+            interval: 2
+            weight: 2
+        backup_node: "{{ groups['load_balancers'][0] }}"
+        router_id: 51
+        router_pri_backup: 254
+        router_pri_master: 255
+        vip_int: enp7s0
+        vip_addresses:
+          - 10.9.96.70/28
+    keepalived_config: true
+    keepalived_router_info:
+      - name: VI_2
+        check_script:
+          - name: check_nginx
+            script: /usr/bin/killall -0 nginx
+            interval: 2
+            weight: 2
+        backup_node: "{{ groups['load_balancers'][0] }}"
+        router_id: 51
+        router_pri_backup: 254
+        router_pri_master: 255
+        vip_int: enp6s0
+        vip_addresses:
+          - 10.9.96.37/27
+  tasks:
+    - name: Include ansible-keepalived
+      include_role:
+        name: ansible-keepalived
+    - name: Include ansible-nginx-load-balancer
+      include_role:
+        name: ansible-nginx-load-balancer
